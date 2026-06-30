@@ -16,10 +16,10 @@ interface Generation {
 }
 
 export default function GenerationCard({
-  pnr,
+  sessionId,
   generation,
 }: {
-  pnr: string;
+  sessionId: string;
   generation: Generation;
 }) {
   const [suggestions, setSuggestions] = useState(generation.suggestions);
@@ -33,7 +33,7 @@ export default function GenerationCard({
 
     try {
       const res = await fetch(
-        `/api/sessions/${pnr}/generations/${generation._id}/star`,
+        `/api/sessions/${sessionId}/generations/${generation._id}/star`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

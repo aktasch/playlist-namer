@@ -4,9 +4,9 @@ import { getSessionsCollection } from "@/lib/mongodb";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ pnr: string; generationId: string }> },
+  { params }: { params: Promise<{ sessionId: string; generationId: string }> },
 ) {
-  const { pnr, generationId } = await params;
+  const { sessionId, generationId } = await params;
   const body = await req.json();
   const { suggestionIndex } = body as { suggestionIndex?: number };
 
@@ -27,7 +27,7 @@ export async function PATCH(
 
   const collection = await getSessionsCollection();
   const session = await collection.findOne({
-    pnr,
+    sessionId,
     "generations._id": generationObjectId,
   });
 
@@ -39,7 +39,7 @@ export async function PATCH(
   const currentValue = generation!.suggestions[suggestionIndex].starred;
 
   await collection.updateOne(
-    { pnr, "generations._id": generationObjectId },
+    { sessionId, "generations._id": generationObjectId },
     {
       $set: {
         [`generations.$.suggestions.${suggestionIndex}.starred`]: !currentValue,

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import GenerationCard from "@/components/GenerationCard";
 
-const STORAGE_KEY = "playlistNamerPnr";
+const STORAGE_KEY = "playlistNamerSessionId";
 
 interface Suggestion {
   name: string;
@@ -19,12 +19,12 @@ interface Generation {
 }
 
 interface Session {
-  pnr: string;
+  sessionId: string;
   generations: Generation[];
 }
 
 export default function Home() {
-  const [pnr, setPnr] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [tracklist, setTracklist] = useState("");
   const [resumeInput, setResumeInput] = useState("");
@@ -39,23 +39,23 @@ export default function Home() {
     }
   }, []);
 
-  async function loadSession(targetPnr: string, opts: { silent?: boolean } = {}) {
+  async function loadSession(targetSessionId: string, opts: { silent?: boolean } = {}) {
     try {
-      const res = await fetch(`/api/sessions/${targetPnr}`);
+      const res = await fetch(`/api/sessions/${targetSessionId}`);
       if (!res.ok) {
         if (res.status === 404) {
           if (opts.silent) {
             localStorage.removeItem(STORAGE_KEY);
           } else {
-            setError("PNR not found");
+            setError("Session ID not found");
           }
         }
         return;
       }
       const session: Session = await res.json();
-      setPnr(session.pnr);
+      setSessionId(session.sessionId);
       setGenerations(session.generations);
-      localStorage.setItem(STORAGE_KEY, session.pnr);
+      localStorage.setItem(STORAGE_KEY, session.sessionId);
       setError(null);
     } catch {
       if (!opts.silent) setError("Failed to load session");
@@ -69,16 +69,16 @@ export default function Home() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pnr: pnr ?? undefined, tracklist }),
+        body: JSON.stringify({ sessionId: sessionId ?? undefined, tracklist }),
       });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Something went wrong");
         return;
       }
-      setPnr(data.pnr);
+      setSessionId(data.sessionId);
       setGenerations((prev) => [data.generation, ...prev]);
-      localStorage.setItem(STORAGE_KEY, data.pnr);
+      localStorage.setItem(STORAGE_KEY, data.sessionId);
       setTracklist("");
     } catch {
       setError("Failed to generate names, please try again");
@@ -95,8 +95,8 @@ export default function Home() {
   }
 
   function handleCopy() {
-    if (!pnr) return;
-    navigator.clipboard.writeText(pnr);
+    if (!sessionId) return;
+    navigator.clipboard.writeText(sessionId);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   }
@@ -108,11 +108,11 @@ export default function Home() {
           <h1 className="text-lg font-semibold text-white">
             Playlist Name Synthesizer
           </h1>
-          {pnr && (
+          {sessionId && (
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-[#889397]">PNR</span>
+              <span className="text-[#889397]">Session ID</span>
               <code className="rounded bg-[#0A2E3D] px-2 py-1 font-mono text-[#00ED64]">
-                {pnr}
+                {sessionId}
               </code>
               <button
                 onClick={handleCopy}
@@ -129,7 +129,7 @@ export default function Home() {
         <section className="flex items-center gap-2">
           <input
             type="text"
-            placeholder="Enter PNR to resume"
+            placeholder="Enter Session ID to resume"
             value={resumeInput}
             onChange={(e) => setResumeInput(e.target.value)}
             className="flex-1 rounded-md border border-[#C1C7C6] bg-white px-3 py-2 text-sm text-[#001E2B] focus:border-[#00684A] focus:outline-none"
@@ -163,7 +163,7 @@ export default function Home() {
         {generations.length > 0 && (
           <section className="flex flex-col gap-4">
             {generations.map((g) => (
-              <GenerationCard key={g._id} pnr={pnr!} generation={g} />
+              <GenerationCard key={g._id} sessionId={sessionId!} generation={g} />
             ))}
           </section>
         )}

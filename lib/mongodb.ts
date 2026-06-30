@@ -14,7 +14,7 @@ export interface Generation {
 }
 
 export interface Session {
-  pnr: string;
+  sessionId: string;
   createdAt: Date;
   generations: Generation[];
 }

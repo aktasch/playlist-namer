@@ -3,14 +3,14 @@ import { getSessionsCollection } from "@/lib/mongodb";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ pnr: string }> },
+  { params }: { params: Promise<{ sessionId: string }> },
 ) {
-  const { pnr } = await params;
+  const { sessionId } = await params;
   const collection = await getSessionsCollection();
-  const session = await collection.findOne({ pnr });
+  const session = await collection.findOne({ sessionId });
 
   if (!session) {
-    return NextResponse.json({ error: "PNR not found" }, { status: 404 });
+    return NextResponse.json({ error: "Session ID not found" }, { status: 404 });
   }
 
   return NextResponse.json(session);

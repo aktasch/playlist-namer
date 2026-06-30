@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import { getSessionsCollection } from "@/lib/mongodb";
 import { validateTracklist } from "@/lib/validateTracklist";
-import { generateUniquePnr } from "@/lib/generatePnr";
+import { generateUniqueSessionId } from "@/lib/generateSessionId";
 import { generateSuggestions } from "@/lib/generateNames";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { pnr, tracklist } = body as { pnr?: string; tracklist?: string };
+  const { sessionId, tracklist } = body as { sessionId?: string; tracklist?: string };
 
   if (typeof tracklist !== "string") {
     return NextResponse.json({ error: "tracklist is required" }, { status: 400 });
@@ -20,16 +20,20 @@ export async function POST(req: NextRequest) {
 
   const collection = await getSessionsCollection();
 
-  let resolvedPnr: string;
-  if (pnr) {
-    const existing = await collection.findOne({ pnr });
+  let resolvedSessionId: string;
+  if (sessionId) {
+    const existing = await collection.findOne({ sessionId });
     if (!existing) {
-      return NextResponse.json({ error: "PNR not found" }, { status: 404 });
+      return NextResponse.json({ error: "Session ID not found" }, { status: 404 });
     }
-    resolvedPnr = pnr;
+    resolvedSessionId = sessionId;
   } else {
-    resolvedPnr = await generateUniquePnr(collection);
-    await collection.insertOne({ pnr: resolvedPnr, createdAt: new Date(), generations: [] });
+    resolvedSessionId = await generateUniqueSessionId(collection);
+    await collection.insertOne({
+      sessionId: resolvedSessionId,
+      createdAt: new Date(),
+      generations: [],
+    });
   }
 
   let suggestions;
@@ -46,7 +50,10 @@ export async function POST(req: NextRequest) {
     createdAt: new Date(),
   };
 
-  await collection.updateOne({ pnr: resolvedPnr }, { $push: { generations: generation } });
+  await collection.updateOne(
+    { sessionId: resolvedSessionId },
+    { $push: { generations: generation } },
+  );
 
-  return NextResponse.json({ pnr: resolvedPnr, generation });
+  return NextResponse.json({ sessionId: resolvedSessionId, generation });
 }
