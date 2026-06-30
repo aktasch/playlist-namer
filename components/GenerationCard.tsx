@@ -47,11 +47,11 @@ export default function GenerationCard({
   }
 
   return (
-    <div className="rounded-lg border border-neutral-200 p-4">
-      <p className="mb-3 text-xs text-neutral-500">
+    <div className="rounded-lg border border-[#E8EDEB] bg-white p-4 shadow-sm">
+      <p className="mb-3 text-xs text-[#5C6C75]">
         {new Date(generation.createdAt).toLocaleString()}
       </p>
-      <details className="mb-3 text-sm text-neutral-600">
+      <details className="mb-3 text-sm text-[#5C6C75]">
         <summary className="cursor-pointer select-none">
           {generation.tracklist.length} tracks
         </summary>
@@ -65,16 +65,16 @@ export default function GenerationCard({
         {suggestions.map((s, i) => (
           <div
             key={i}
-            className="flex items-start justify-between gap-3 rounded-md bg-neutral-50 p-3"
+            className="flex items-start justify-between gap-3 rounded-md bg-[#F9FBFA] p-3"
           >
             <div>
-              <p className="font-medium">{s.name}</p>
-              <p className="text-sm text-neutral-600">{s.reasoning}</p>
+              <p className="font-medium text-[#001E2B]">{s.name}</p>
+              <p className="text-sm text-[#5C6C75]">{s.reasoning}</p>
             </div>
             <button
               onClick={() => toggleStar(i)}
               aria-label={s.starred ? "Unstar" : "Star"}
-              className="shrink-0 text-xl"
+              className="shrink-0 text-xl text-[#00684A]"
             >
               {s.starred ? "★" : "☆"}
             </button>
