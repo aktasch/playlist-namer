@@ -40,5 +40,5 @@ function getClientPromise(): Promise<MongoClient> {
 
 export async function getSessionsCollection(): Promise<Collection<Session>> {
   const client = await getClientPromise();
-  return client.db().collection<Session>("sessions");
+  return client.db("playlistNameSynthesizer").collection<Session>("sessions");
 }
