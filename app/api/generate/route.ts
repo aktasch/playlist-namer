@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
-import { getSessionsCollection } from "@/lib/mongodb";
+import { appendGeneration, createSession, getSessionsCollection } from "@/lib/mongodb";
 import { validateTracklist } from "@/lib/validateTracklist";
 import { generateUniqueSessionId } from "@/lib/generateSessionId";
 import { generateSuggestions } from "@/lib/generateNames";
@@ -29,11 +29,7 @@ export async function POST(req: NextRequest) {
     resolvedSessionId = sessionId;
   } else {
     resolvedSessionId = await generateUniqueSessionId(collection);
-    await collection.insertOne({
-      sessionId: resolvedSessionId,
-      createdAt: new Date(),
-      generations: [],
-    });
+    await createSession(collection, resolvedSessionId);
   }
 
   let suggestions;
@@ -50,10 +46,7 @@ export async function POST(req: NextRequest) {
     createdAt: new Date(),
   };
 
-  await collection.updateOne(
-    { sessionId: resolvedSessionId },
-    { $push: { generations: generation } },
-  );
+  await appendGeneration(collection, resolvedSessionId, generation);
 
   return NextResponse.json({ sessionId: resolvedSessionId, generation });
 }

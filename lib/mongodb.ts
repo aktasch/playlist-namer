@@ -13,10 +13,15 @@ export interface Generation {
   createdAt: Date;
 }
 
+export const MAX_GENERATIONS_PER_BUCKET = 10;
+
 export interface Session {
   sessionId: string;
   createdAt: Date;
   generations: Generation[];
+  bucketSeq: number;
+  previousBucketId: ObjectId | null;
+  isLatest: boolean;
 }
 
 declare global {
@@ -41,4 +46,81 @@ function getClientPromise(): Promise<MongoClient> {
 export async function getSessionsCollection(): Promise<Collection<Session>> {
   const client = await getClientPromise();
   return client.db("playlistNameSynthesizer").collection<Session>("sessions");
+}
+
+export async function createSession(
+  collection: Collection<Session>,
+  sessionId: string,
+): Promise<void> {
+  await collection.insertOne({
+    sessionId,
+    createdAt: new Date(),
+    generations: [],
+    bucketSeq: 1,
+    previousBucketId: null,
+    isLatest: true,
+  });
+}
+
+export async function appendGeneration(
+  collection: Collection<Session>,
+  sessionId: string,
+  generation: Generation,
+): Promise<void> {
+  const result = await collection.updateOne(
+    {
+      sessionId,
+      isLatest: true,
+      $expr: { $lt: [{ $size: "$generations" }, MAX_GENERATIONS_PER_BUCKET] },
+    },
+    { $push: { generations: generation } },
+  );
+
+  if (result.matchedCount > 0) {
+    return;
+  }
+
+  // Latest bucket is full (or missing) — roll over to a new bucket.
+  const latest = await collection.findOne(
+    { sessionId, isLatest: true },
+    { sort: { bucketSeq: -1 } },
+  );
+
+  if (!latest) {
+    throw new Error(`No session found for sessionId ${sessionId}`);
+  }
+
+  await collection.updateOne(
+    { _id: latest._id },
+    { $set: { isLatest: false } },
+  );
+
+  await collection.insertOne({
+    sessionId,
+    createdAt: new Date(),
+    generations: [generation],
+    bucketSeq: latest.bucketSeq + 1,
+    previousBucketId: latest._id,
+    isLatest: true,
+  });
+}
+
+export async function getMergedSession(
+  collection: Collection<Session>,
+  sessionId: string,
+): Promise<{ sessionId: string; createdAt: Date; generations: Generation[] } | null> {
+  const buckets = await collection
+    .find({ sessionId })
+    .sort({ bucketSeq: 1 })
+    .toArray();
+
+  if (buckets.length === 0) {
+    return null;
+  }
+
+  return {
+    sessionId,
+    createdAt: buckets[0].createdAt,
+    generations: buckets.flatMap((bucket) => bucket.generations),
+  };
 }

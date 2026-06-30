@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionsCollection } from "@/lib/mongodb";
+import { getMergedSession, getSessionsCollection } from "@/lib/mongodb";
 
 export async function GET(
   req: NextRequest,
@@ -7,7 +7,7 @@ export async function GET(
 ) {
   const { sessionId } = await params;
   const collection = await getSessionsCollection();
-  const session = await collection.findOne({ sessionId });
+  const session = await getMergedSession(collection, sessionId);
 
   if (!session) {
     return NextResponse.json({ error: "Session ID not found" }, { status: 404 });
