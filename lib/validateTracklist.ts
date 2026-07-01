@@ -6,9 +6,9 @@ export type ValidationResult =
   | { valid: false; error: string };
 
 export function validateTracklist(raw: string): ValidationResult {
-  const lines = raw.split("\n");
+  const lines = raw.split("\n").filter((l) => l.trim() !== "");
 
-  if (lines.length === 1 && lines[0].trim() === "") {
+  if (lines.length === 0) {
     return { valid: false, error: "Tracklist is empty" };
   }
 

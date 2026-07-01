@@ -34,22 +34,14 @@ export default function Home() {
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      loadSession(stored, { silent: true });
-    }
+    if (stored) setResumeInput(stored);
   }, []);
 
-  async function loadSession(targetSessionId: string, opts: { silent?: boolean } = {}) {
+  async function loadSession(targetSessionId: string) {
     try {
       const res = await fetch(`/api/sessions/${targetSessionId}`);
       if (!res.ok) {
-        if (res.status === 404) {
-          if (opts.silent) {
-            localStorage.removeItem(STORAGE_KEY);
-          } else {
-            setError("Session ID not found");
-          }
-        }
+        if (res.status === 404) setError("Session ID not found");
         return;
       }
       const session: Session = await res.json();
@@ -58,7 +50,7 @@ export default function Home() {
       localStorage.setItem(STORAGE_KEY, session.sessionId);
       setError(null);
     } catch {
-      if (!opts.silent) setError("Failed to load session");
+      setError("Failed to load session");
     }
   }
 
