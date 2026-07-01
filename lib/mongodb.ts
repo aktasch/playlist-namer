@@ -11,6 +11,12 @@ export interface Generation {
   tracklist: string[];
   suggestions: Suggestion[];
   createdAt: Date;
+  trackCount: number;
+  generationMs: number;
+  userAgent: string | null;
+  country: string | null;
+  city: string | null;
+  referer: string | null;
 }
 
 export const MAX_GENERATIONS_PER_BUCKET = 10;

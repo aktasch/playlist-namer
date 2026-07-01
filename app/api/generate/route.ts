@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
   }
 
   let suggestions;
+  const t0 = Date.now();
   try {
     suggestions = await generateSuggestions(validation.tracks);
   } catch {
@@ -44,6 +45,12 @@ export async function POST(req: NextRequest) {
     tracklist: validation.tracks,
     suggestions: suggestions.map((s) => ({ ...s, starred: false })),
     createdAt: new Date(),
+    trackCount: validation.tracks.length,
+    generationMs: Date.now() - t0,
+    userAgent: req.headers.get("user-agent"),
+    country: req.headers.get("x-vercel-ip-country"),
+    city: req.headers.get("x-vercel-ip-city"),
+    referer: req.headers.get("referer"),
   };
 
   await appendGeneration(collection, resolvedSessionId, generation);
