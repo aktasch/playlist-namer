@@ -13,7 +13,7 @@ Create `.env.local`:
 ```env
 MONGODB_URI=...      # MongoDB Atlas connection string
 GROQ_API_KEY=...     # groq.com API key
-GROQ_MODEL=...       # optional, defaults to llama-3.3-70b-versatile
+GROQ_MODEL=...       # optional, defaults to openai/gpt-oss-120b
 ```
 
 ```bash
@@ -41,4 +41,4 @@ No `vercel.json` is needed — Vercel auto-detects Next.js.
 
 - Next.js (App Router) + React
 - MongoDB Atlas — sessions stored with a 10-generations-per-document bucketing scheme
-- Groq (llama-3.3-70b-versatile) via OpenAI-compatible API
+- Groq (openai/gpt-oss-120b) via OpenAI-compatible API

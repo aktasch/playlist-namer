@@ -38,7 +38,8 @@ export async function POST(req: NextRequest) {
   const t0 = Date.now();
   try {
     suggestions = await generateSuggestions(validation.tracks);
-  } catch {
+  } catch (err) {
+    console.error("generateSuggestions failed:", err);
     return NextResponse.json({ error: "Failed to generate names, please try again" }, { status: 502 });
   }
 

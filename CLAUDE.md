@@ -22,7 +22,7 @@ Required in `.env.local`:
 ```env
 MONGODB_URI=...        # MongoDB Atlas connection string
 GROQ_API_KEY=...       # Groq API key
-GROQ_MODEL=...         # optional, defaults to llama-3.3-70b-versatile
+GROQ_MODEL=...         # optional, defaults to openai/gpt-oss-120b
 ```
 
 ## Architecture

@@ -18,7 +18,7 @@ function getClient(): OpenAI {
   return client;
 }
 
-const MODEL = process.env.GROQ_MODEL ?? "llama-3.3-70b-versatile";
+const MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
 
 export async function generateSuggestions(tracks: string[]): Promise<NameSuggestion[]> {
   const response = await getClient().chat.completions.create({
