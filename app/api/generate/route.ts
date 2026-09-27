@@ -5,6 +5,8 @@ import { validateTracklist } from "@/lib/validateTracklist";
 import { generateUniqueSessionId } from "@/lib/generateSessionId";
 import { generateSuggestions } from "@/lib/generateNames";
 
+export const maxDuration = 30;
+
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const { sessionId, tracklist } = body as { sessionId?: string; tracklist?: string };

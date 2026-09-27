@@ -20,6 +20,15 @@ GROQ_MODEL=...       # optional, defaults to llama-3.3-70b-versatile
 npm run dev
 ```
 
+## Deploying to Vercel
+
+No `vercel.json` is needed — Vercel auto-detects Next.js.
+
+1. **MongoDB Atlas → Network Access**: allow `0.0.0.0/0` (Vercel functions use dynamic IPs), or use the Vercel ↔ MongoDB Atlas integration, which sets `MONGODB_URI` for you.
+2. **Vercel → Add New Project** → import this GitHub repo (framework preset: Next.js, default build settings).
+3. **Environment variables** (Production + Preview): `MONGODB_URI`, `GROQ_API_KEY`, optionally `GROQ_MODEL`.
+4. Deploy. Pushes to `main` deploy to production automatically.
+
 ## How it works
 
 - Enter tracks in `Artist - Track Name` format (minimum 3)

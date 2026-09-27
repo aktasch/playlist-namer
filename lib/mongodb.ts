@@ -40,13 +40,17 @@ function getClientPromise(): Promise<MongoClient> {
     throw new Error("Missing MONGODB_URI environment variable");
   }
 
-  if (process.env.NODE_ENV === "development") {
-    if (!global._mongoClientPromise) {
-      global._mongoClientPromise = new MongoClient(uri).connect();
-    }
-    return global._mongoClientPromise;
+  // Cache the client in every environment: dev hot reloads and warm
+  // serverless instances (e.g. Vercel) reuse one connection pool.
+  if (!global._mongoClientPromise) {
+    global._mongoClientPromise = new MongoClient(uri, { maxPoolSize: 10 })
+      .connect()
+      .catch((err) => {
+        global._mongoClientPromise = undefined;
+        throw err;
+      });
   }
-  return new MongoClient(uri).connect();
+  return global._mongoClientPromise;
 }
 
 export async function getSessionsCollection(): Promise<Collection<Session>> {

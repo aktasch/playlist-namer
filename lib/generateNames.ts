@@ -5,15 +5,23 @@ export interface NameSuggestion {
   reasoning: string;
 }
 
-const client = new OpenAI({
-  baseURL: "https://api.groq.com/openai/v1",
-  apiKey: process.env.GROQ_API_KEY,
-});
+let client: OpenAI | undefined;
+
+// Created lazily so a missing GROQ_API_KEY doesn't break `next build`.
+function getClient(): OpenAI {
+  if (!client) {
+    client = new OpenAI({
+      baseURL: "https://api.groq.com/openai/v1",
+      apiKey: process.env.GROQ_API_KEY,
+    });
+  }
+  return client;
+}
 
 const MODEL = process.env.GROQ_MODEL ?? "llama-3.3-70b-versatile";
 
 export async function generateSuggestions(tracks: string[]): Promise<NameSuggestion[]> {
-  const response = await client.chat.completions.create({
+  const response = await getClient().chat.completions.create({
     model: MODEL,
     messages: [
       {
